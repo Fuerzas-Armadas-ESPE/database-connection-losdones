@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -24,10 +24,25 @@ export class PostsService {
   }
 
   async updatePost(id: string, postData: any): Promise<any | null> {
-    // Implementa el método de actualización si es necesario
+    try {
+      const updatedPost = await this.postModel.findByIdAndUpdate(id, postData, { new: true }).exec();
+      if (!updatedPost) {
+        throw new NotFoundException(`Post with id ${id} not found`);
+      }
+      return updatedPost;
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async deletePost(id: string): Promise<void> {
-    // Implementa el método de eliminación si es necesario
+    try {
+      const deletedPost = await this.postModel.findByIdAndDelete(id).exec();
+      if (!deletedPost) {
+        throw new NotFoundException(`Post with id ${id} not found`);
+      }
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
